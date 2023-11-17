@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
         .init();
 
     //  Set up providers and signers.
-    let read_provider = Provider::<Ws>::connect(&args.ws_rpc_url).await.unwrap();
+    let read_provider = Provider::<Ws>::connect_with_reconnects(&args.ws_rpc_url, 100).await.unwrap();
     let write_provider = Provider::try_from(&args.http_rpc_url).unwrap();
 
     // Confirm that the input chain_id and chain_id of provider match
@@ -132,7 +132,11 @@ async fn main() -> Result<()> {
     // Start engine.
     if let Ok(mut set) = engine.run().await {
         while let Some(res) = set.join_next().await {
-            info!("res: {:?}", res);
+            if res.is_err() {
+                return Result::Err(anyhow::Error::msg(res.err().unwrap()));
+            } else {
+                info!("res: {:?}", res);
+            }
         }
     }
 
