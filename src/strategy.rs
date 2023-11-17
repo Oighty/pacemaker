@@ -109,18 +109,17 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                     };
 
                     // Calculate current gas fee with gas estimate, gas price and eth price
-                    let gas_fee = ((gas_estimate * gas_price).as_u64() as f64) * eth_price / 1e18f64;
+                    let gas_fee = (((gas_estimate * gas_price).as_u64() as f64) * eth_price) / 1e18f64;
 
                     // Calculate current reward
-                    let reward = ((max_reward.as_u64() * b / blocks) as f64) * ohm_price / 1e9f64;
+                    let reward = ((((max_reward.as_u64() * b) / blocks) as f64) * ohm_price) / 1e9f64;
 
                     // If reward is greater than gas fee + profit threshold, then tx is likely to be included
                     if reward > gas_fee + self.profit_threshold {
                         info!("Heartbeat is profitable. Submitting transaction.");
                         
-                        // Calculate and set the bid gas price based on the current reward and threshold
-                        let bid_gas_price = U256::from((((reward - self.profit_threshold) / eth_price) * 1e18f64) as u64 / gas_estimate.as_u64());
-                        tx.set_gas_price(bid_gas_price);
+                        // Set gas price to the current
+                        tx.set_gas_price(gas_price);
 
                         return vec![Action::SubmitTx(tx)];
                     }
