@@ -173,3 +173,29 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn reward_math_no_overflows() {
+        use ethers::types::U256;
+        let eth_price = U256::from(2000e6 as u64);
+        let ohm_price = U256::from(11e6 as u64);
+        let gas_estimate = U256::from(500000 as u64);
+        let gas_price = U256::from(100e9 as u64);
+        let max_reward = U256::from(40e9 as u64);
+        let auction_duration = 1200;
+        let blocks = auction_duration / 12;
+        let block = 10u64;
+
+        let gas_fee = (gas_estimate * gas_price * eth_price) / U256::from(1e6 as u64);
+        let reward = (max_reward * U256::from(block * 1e9 as u64) * ohm_price)
+            / U256::from(blocks * 1e6 as u64);
+
+        let threshold = gas_fee + U256::from((10.0f64 * 1e6f64) as u64) * U256::from(1e12 as u64);
+
+        println!("Gas fee: {}", gas_fee);
+        println!("Reward: {}", reward);
+        println!("Threshold: {}", threshold);
+    }
+}
