@@ -13,7 +13,7 @@ use reqwest::Client;
 use artemis_core::types::Strategy;
 
 // Ethereum types
-use ethers::types::{Address, U256};
+use ethers::types::{Address, Bytes, Log, H256, U256};
 
 // Local types
 use crate::bindings::olympus_heart::OlympusHeart;
@@ -54,6 +54,23 @@ impl<M: Middleware + 'static> PacemakerStrategy<M> {
 #[async_trait]
 impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
     async fn sync_state(&mut self) -> Result<()> {
+        // Trigger a heartbeat with the current last beat time when starting up so the bot doesn't miss one
+        let heart = OlympusHeart::new(self.heart, self.provider.clone());
+        let last_beat = heart.last_beat().call().await.unwrap();
+        let event = Event::HeartBeat(Log {
+            address: self.heart,
+            topics: vec![H256::from_low_u64_be(last_beat)],
+            data: Bytes::new(),
+            block_hash: None,
+            block_number: None,
+            transaction_hash: None,
+            transaction_index: None,
+            log_index: None,
+            transaction_log_index: None,
+            log_type: None,
+            removed: None,
+        });
+        self.process_event(event).await;
         Ok(())
     }
 
