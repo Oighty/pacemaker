@@ -84,7 +84,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                 debug!("Last beat: {}", last_beat);
                 let heart = OlympusHeart::new(self.heart, self.provider.clone());
                 let frequency = heart.frequency().call().await.unwrap();
-                debug!("Frequency: {}", last_beat);
+                debug!("Frequency: {}", frequency);
                 let auction_duration = heart.auction_duration().call().await.unwrap();
                 debug!("Auction duration: {}", auction_duration);
                 let max_reward = heart.max_reward().call().await.unwrap();
