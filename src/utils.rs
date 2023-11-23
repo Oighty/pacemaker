@@ -19,15 +19,16 @@ pub fn bytes_to_string(bytes: &[u8]) -> String {
     format!("0x{}", hex::encode(bytes))
 }
 
-pub async fn get_token_price(
-    web_client: &Client,
-    token: &str,
-) -> Result<f64> {
-    let url = format!(
-        "https://coins.llama.fi/prices/current/coingecko:{}",
-        token
-    );
-    let payload = web_client.get(&url).send().await?.json::<serde_json::Value>().await?;
-    let price = payload["coins"][format!("coingecko:{}", token)]["price"].as_f64().unwrap();
+pub async fn get_token_price(web_client: &Client, token: &str) -> Result<f64> {
+    let url = format!("https://coins.llama.fi/prices/current/coingecko:{}", token);
+    let payload = web_client
+        .get(&url)
+        .send()
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
+    let price = payload["coins"][format!("coingecko:{}", token)]["price"]
+        .as_f64()
+        .unwrap();
     Ok(price)
 }

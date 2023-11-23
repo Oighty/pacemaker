@@ -9,7 +9,7 @@
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct ExitPoolRequest {
     pub assets: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -28,7 +28,7 @@ pub struct ExitPoolRequest {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Config {
     pub cushion_factor: u32,
@@ -51,7 +51,7 @@ pub struct Config {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Regen {
     pub count: u32,
@@ -70,7 +70,7 @@ pub struct Regen {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Status {
     pub low: Regen,
@@ -87,7 +87,7 @@ pub struct Status {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Instruction {
     pub action: u8,
@@ -104,7 +104,7 @@ pub struct Instruction {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct JoinPoolRequest {
     pub assets: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -123,7 +123,7 @@ pub struct JoinPoolRequest {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Permissions {
     pub keycode: [u8; 5],
@@ -140,7 +140,7 @@ pub struct Permissions {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Band {
     pub high: Line,
@@ -158,7 +158,7 @@ pub struct Band {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Line {
     pub price: ::ethers::core::types::U256,
@@ -174,7 +174,7 @@ pub struct Line {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Range {
     pub low: Side,
@@ -193,7 +193,7 @@ pub struct Range {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Side {
     pub active: bool,
@@ -213,7 +213,7 @@ pub struct Side {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct RewardsData {
     pub reward_token: ::ethers::core::types::Address,

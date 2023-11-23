@@ -70,7 +70,9 @@ async fn main() -> Result<()> {
         .init();
 
     //  Set up providers and signers.
-    let read_provider = Provider::<Ws>::connect_with_reconnects(&args.ws_rpc_url, 100).await.unwrap();
+    let read_provider = Provider::<Ws>::connect_with_reconnects(&args.ws_rpc_url, 100)
+        .await
+        .unwrap();
     let write_provider = Provider::try_from(&args.http_rpc_url).unwrap();
 
     // Confirm that the input chain_id and chain_id of provider match
@@ -83,7 +85,10 @@ async fn main() -> Result<()> {
         );
     }
 
-    info!("Starting pacemaker for Heart contract {} on chain {}", args.heart_address, write_provider_chain_id);
+    info!(
+        "Starting pacemaker for Heart contract {} on chain {}",
+        args.heart_address, write_provider_chain_id
+    );
 
     // Parse key for signer and add to write provider
     let wallet: LocalWallet = args.private_key.parse().unwrap();

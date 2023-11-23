@@ -1,4 +1,4 @@
-use ethers::types::{Log, transaction::eip2718::TypedTransaction};
+use ethers::types::{transaction::eip2718::TypedTransaction, Log};
 
 /// Core Event enum for the current strategy.
 #[derive(Debug, Clone)]

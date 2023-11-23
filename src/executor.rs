@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use crate::utils::{bytes_to_string, get_sys_time_in_secs};
 use anyhow::Result;
 use artemis_core::types::Executor;
 use async_trait::async_trait;
@@ -9,7 +10,6 @@ use ethers::{
     signers::Signer,
     types::{transaction::eip2718::TypedTransaction, H256, U256},
 };
-use crate::utils::{bytes_to_string, get_sys_time_in_secs};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error, info, warn};
@@ -33,9 +33,7 @@ pub struct FlashbotsStatus {
 }
 
 impl<M: Middleware, S: Signer> ProtectExecutor<M, S> {
-    pub fn new(
-        provider: Arc<SignerMiddleware<M, S>>
-    ) -> Self {
+    pub fn new(provider: Arc<SignerMiddleware<M, S>>) -> Self {
         Self {
             provider,
             web_client: Client::new(),
