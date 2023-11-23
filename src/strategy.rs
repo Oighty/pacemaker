@@ -77,13 +77,18 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
     async fn process_event(&mut self, event: Event) -> Vec<Action> {
         match event {
             Event::HeartBeat(log) => {
+                info!("Processing heartbeat event.");
                 // Steps
                 // 0. Get updated info from contract and current token prices
                 let last_beat = U256::from_big_endian(log.topics[0].as_bytes()).as_u64();
+                debug!("Last beat: {}", last_beat);
                 let heart = OlympusHeart::new(self.heart, self.provider.clone());
                 let frequency = heart.frequency().call().await.unwrap();
+                debug!("Frequency: {}", last_beat);
                 let auction_duration = heart.auction_duration().call().await.unwrap();
+                debug!("Auction duration: {}", auction_duration);
                 let max_reward = heart.max_reward().call().await.unwrap();
+                debug!("Max reward: {}", max_reward);
 
                 let eth_price = U256::from(
                     ((match get_token_price(&self.web_client, "ethereum").await {
@@ -94,6 +99,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                         }
                     }) * (1e6 as f64)) as u64,
                 );
+                debug!("ETH price: {}", eth_price);
 
                 let ohm_price = U256::from(
                     ((match get_token_price(&self.web_client, "olympus").await {
@@ -104,6 +110,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                         }
                     }) * (1e6 as f64)) as u64,
                 );
+                debug!("OHM price: {}", ohm_price);
 
                 let mut tx = heart.beat().tx;
 
@@ -121,6 +128,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                 for b in 0..=blocks {
                     // Get gas estimate for the heartbeat
                     let gas_estimate = self.provider.estimate_gas(&tx, None).await.unwrap();
+                    debug!("Gas estimate: {}", gas_estimate);
 
                     // Get current gas price
                     debug!("Retrieving gas price from provider.");
@@ -131,13 +139,16 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                             return vec![];
                         }
                     };
+                    debug!("Gas price: {}", gas_price);
 
                     // Calculate current gas fee with gas estimate, gas price and eth price
                     let gas_fee = (gas_estimate * gas_price * eth_price) / U256::from(1e6 as u64);
+                    debug!("Gas fee (in dollars * 1e18): {}", gas_fee);
 
                     // Calculate current reward
                     let reward = (max_reward * U256::from(b * 1e9 as u64) * ohm_price)
                         / U256::from(blocks * 1e6 as u64);
+                    debug!("Reward (in dollars * 1e18): {}", reward);
 
                     // If reward is greater than gas fee + profit threshold, then tx is likely to be included
                     if reward
