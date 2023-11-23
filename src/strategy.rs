@@ -69,21 +69,21 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                 let auction_duration = heart.auction_duration().call().await.unwrap();
                 let max_reward = heart.max_reward().call().await.unwrap();
 
-                let eth_price = match get_token_price(&self.web_client, "ethereum").await {
+                let eth_price = U256::from(((match get_token_price(&self.web_client, "ethereum").await {
                     Ok(price) => price,
                     Err(e) => {
                         error!("Error getting ETH price from API: {}", e);
                         return vec![];
                     }
-                };
+                }) * (1e6 as f64)) as u64);
 
-                let ohm_price = match get_token_price(&self.web_client, "olympus").await {
+                let ohm_price = U256::from(((match get_token_price(&self.web_client, "olympus").await {
                     Ok(price) => price,
                     Err(e) => {
                         error!("Error getting OHM price from API: {}", e);
                         return vec![];
                     }
-                };
+                }) * (1e6 as f64)) as u64);
                 
                 let mut tx = heart.beat().tx;
 
@@ -109,13 +109,13 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                     };
 
                     // Calculate current gas fee with gas estimate, gas price and eth price
-                    let gas_fee = (((gas_estimate * gas_price).as_u64() as f64) * eth_price) / 1e18f64;
+                    let gas_fee = (gas_estimate * gas_price * eth_price) / U256::from(1e6 as u64);
 
                     // Calculate current reward
-                    let reward = ((((max_reward.as_u64() * b) / blocks) as f64) * ohm_price) / 1e9f64;
+                    let reward = (max_reward * U256::from(b * 1e9 as u64) * ohm_price) / U256::from(blocks * 1e6 as u64);
 
                     // If reward is greater than gas fee + profit threshold, then tx is likely to be included
-                    if reward > gas_fee + self.profit_threshold {
+                    if reward > gas_fee + U256::from((self.profit_threshold * 1e6f64) as u64) * U256::from(1e12 as u64)  {
                         info!("Heartbeat is profitable. Submitting transaction.");
                         
                         // Set gas price to the current
