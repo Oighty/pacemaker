@@ -116,7 +116,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
 
                 // 1. Once heartbeat is seen, sleep until the next beat is available
                 let sleep_duration =
-                    Duration::from_secs(frequency - (get_sys_time_in_secs() - last_beat));
+                    Duration::from_secs(frequency - (get_sys_time_in_secs() - last_beat) + 3); // Add 3 seconds to account for staking delay plus a little extra
                 info!(
                     "Sleeping for {} seconds until next beat is available.",
                     sleep_duration.as_secs()
