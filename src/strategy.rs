@@ -113,6 +113,7 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                 debug!("OHM price: {}", ohm_price);
 
                 let mut tx = heart.beat().tx;
+                tx.set_from(self.executor);
 
                 // 1. Once heartbeat is seen, sleep until the next beat is available
                 let sleep_duration =
@@ -124,12 +125,12 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for PacemakerStrategy<M> {
                 sleep(sleep_duration).await;
 
                 // 2. Once the next beat is available, check if it is profitable above our threshold every 12 seconds
+                // Get gas estimate for the heartbeat
+                let gas_estimate = self.provider.estimate_gas(&tx, None).await.unwrap();
+                debug!("Gas estimate: {}", gas_estimate);
+
                 let blocks = auction_duration / 12;
                 for b in 0..=blocks {
-                    // Get gas estimate for the heartbeat
-                    let gas_estimate = self.provider.estimate_gas(&tx, None).await.unwrap();
-                    debug!("Gas estimate: {}", gas_estimate);
-
                     // Get current gas price
                     debug!("Retrieving gas price from provider.");
                     let gas_price = match self.provider.get_gas_price().await {
